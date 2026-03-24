@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+ 
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>เพิ่มข้อมูลสารเคมี — Chemical Stock Management</title>
+ 
+  <!-- Tailwind CSS + DaisyUI -->
+  <link href="https://cdn.jsdelivr.net/npm/daisyui@4.12.14/dist/full.min.css" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+ 
+  <!-- Font Awesome 6 -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+ 
+  <!-- SweetAlert2 -->
+  <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+ 
+  <style>
+    body {
+      background: linear-gradient(135deg, #e0e7ff 0%, #f0fdfa 50%, #fdf4ff 100%);
+      min-height: 100vh;
+    }
+ 
+    .form-card {
+      backdrop-filter: blur(12px);
+      background: rgba(255, 255, 255, 0.85);
+    }
+ 
+    .field-icon {
+      @apply text-primary text-lg;
+    }
+  </style>
+</head>
+ 
+<body class="p-4 md:p-8">
+ 
+  <!-- Header -->
+  <div class="max-w-4xl mx-auto mb-6">
+    <div class="flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="bg-primary/10 p-3 rounded-2xl">
+          <i class="fa-solid fa-flask-vial text-3xl text-primary"></i>
+        </div>
+        <div>
+          <h1 class="text-2xl md:text-3xl font-extrabold text-slate-800 tracking-tight">
+            ระบบบันทึกสารเคมี
+          </h1>
+          <p class="text-sm text-slate-500 mt-0.5">Chemical Stock Management System</p>
+        </div>
+      </div>
+      <a href="index.html"
+        class="btn btn-primary gap-2 text-white hover:text-white hover:bg-green-500 hover:border-green-500 transition-all">
+        <i class="fa-solid fa-house"></i>
+        <span class="hidden sm:inline">Return to Home</span>
+      </a>
+    </div>
+  </div>
+ 
+  <!-- Form Card -->
+  <div class="max-w-4xl mx-auto form-card rounded-3xl shadow-xl border border-white/60 overflow-hidden">
+ 
+    <!-- Card Header -->
+    <div class="bg-gradient-to-r from-green-400 to-blue-500 px-6 py-4 flex items-center gap-3">
+      <i class="fa-solid fa-circle-plus text-white text-xl"></i>
+      <h2 class="text-lg md:text-xl font-bold text-white">เพิ่ม / แก้ไขข้อมูลสารเคมี</h2>
+    </div>
+ 
+    <!-- Form Body -->
+    <form id="data-form" class="p-6 md:p-8 space-y-6">
+      <input type="hidden" id="record-id">
+ 
+      <!-- Row 1: Material Code + Description -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+ 
+        <!-- Material Code -->
+        <div class="form-control w-full">
+          <label class="label" for="material_code">
+            <span class="label-text font-semibold text-slate-700 flex items-center gap-2">
+              <i class="fa-solid fa-barcode field-icon"></i> Tag Number
+            </span>
+          </label>
+          <input type="text" id="material_code" name="material_code" required placeholder="เช่น ADU1-FV010101"
+            class="input input-bordered input-primary w-full focus:input-primary transition-all" />
+        </div>
+ 
+        <!-- Description -->
+        <div class="form-control w-full">
+          <label class="label" for="description">
+            <span class="label-text font-semibold text-slate-700 flex items-center gap-2">
+              <i class="fa-solid fa-file-lines field-icon"></i> Location Description
+            </span>
+          </label>
+          <input type="text" id="description" name="description" required placeholder="Service Location, Description"
+            class="input input-bordered input-primary w-full focus:input-primary transition-all" />
+        </div>
+      </div>
+ 
+      <!-- Row 2: Image + Keeping Area -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+ 
+        <!-- Image Before (URL) -->
+        <div class="form-control w-full">
+          <label class="label" for="image-before">
+            <span class="label-text font-semibold text-slate-700 flex items-center gap-2">
+              <i class="fa-solid fa-image field-icon"></i> URL รูปภาพ Control valve
+            </span>
+          </label>
+          <input type="url" id="image-before" name="image-before" placeholder="https://example.com/photo.jpg"
+            class="input input-bordered input-primary w-full focus:input-primary transition-all" />
+          <div id="preview-before" class="mt-3 hidden">
+            <div class="relative group">
+              <img id="img-before" src="" alt="Preview"
+                class="w-full h-48 object-cover rounded-xl border-2 border-primary/30 shadow-md transition-transform group-hover:scale-[1.02]">
+              <span class="absolute top-2 left-2 badge badge-primary badge-sm gap-1">
+                <i class="fa-solid fa-camera text-[10px]"></i> ตัวอย่าง
+              </span>
+            </div>
+          </div>
+        </div>
+ 
+        <!-- Keeping Area -->
+        <div class="form-control w-full">
+          <label class="label" for="keepingArea">
+            <span class="label-text font-semibold text-slate-700 flex items-center gap-2">
+              <i class="fa-solid fa-warehouse field-icon"></i> Plant / Unit Area
+            </span>
+          </label>
+          <input type="text" id="keepingArea" name="keepingArea" required placeholder="เช่น ADU1"
+            class="input input-bordered input-primary w-full focus:input-primary transition-all" />
+        </div>
+      </div>
+ 
+      <!-- Row 3: Quantity + Lifetime -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+ 
+        <!-- Quantity -->
+        <div class="form-control w-full">
+          <label class="label" for="quantity">
+            <span class="label-text font-semibold text-slate-700 flex items-center gap-2">
+              <i class="fa-solid fa-cubes-stacked field-icon"></i> Type of Valve
+            </span>
+          </label>
+          <input type="text" id="quantity" name="quantity" required placeholder="เช่น GLOBE, BALL, BUTTERFLY"
+            class="input input-bordered input-primary w-full focus:input-primary transition-all" />
+        </div>
+ 
+        <!-- Lifetime -->
+        <div class="form-control w-full">
+          <label class="label" for="lifttime">
+            <span class="label-text font-semibold text-slate-700 flex items-center gap-2">
+              <i class="fa-solid fa-hourglass-half field-icon"></i> Size and Rating
+            </span>
+          </label>
+          <input type="text" id="lifttime" name="lifttime" placeholder="เช่น 4 IN, CLASS 150"
+            class="input input-bordered input-primary w-full focus:input-primary transition-all" />
+        </div>
+      </div>
+ 
+         <!-- Row addition : LeakageClass + FailAction -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+ 
+        <!-- LeakageClass -->
+        <div class="form-control w-full">
+          <label class="label" for="leakage">
+            <span class="label-text font-semibold text-slate-700 flex items-center gap-2">
+              <i class="fa-solid fa-file-lines field-icon"></i> Leakage Class
+            </span>
+          </label>
+          <input type="text" id="leakage" name="leakage" required placeholder="เช่น IV, V, IV"
+            class="input input-bordered input-primary w-full focus:input-primary transition-all" />
+        </div>
+ 
+        <!-- FailAction -->
+        <div class="form-control w-full">
+          <label class="label" for="failaction">
+            <span class="label-text font-semibold text-slate-700 flex items-center gap-2">
+              <i class="fa-solid fa-file-lines field-icon"></i> Fail Action
+            </span>
+          </label>
+          <input type="text" id="failaction" name="failaction" placeholder="เช่น Fail close, Fail open"
+            class="input input-bordered input-primary w-full focus:input-primary transition-all" />
+        </div>
+      </div>
+
+      <!-- Row 4: Date of Use + Expired Date -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+ 
+        <!-- Date of Use -->
+        <div class="form-control w-full">
+          <label class="label" for="dateOfUse">
+            <span class="label-text font-semibold text-slate-700 flex items-center gap-2">
+              <i class="fa-solid fa-calendar-check field-icon text-success"></i> Last activity
+            </span>
+          </label>
+          <input type="date" id="dateOfUse" name="dateOfUse"
+            class="input input-bordered input-primary w-full focus:input-primary transition-all" />
+        </div>
+ 
+        <!-- Expired Date -->
+        <div class="form-control w-full">
+          <label class="label" for="expiredDate">
+            <span class="label-text font-semibold text-slate-700 flex items-center gap-2">
+              <i class="fa-solid fa-calendar-xmark field-icon text-error"></i> Next due date
+            </span>
+          </label>
+          <input type="date" id="expiredDate" name="expiredDate"
+            class="input input-bordered input-error w-full focus:input-error transition-all" />
+        </div>
+      </div>
+ 
+      <!-- Row 5: MSDS -->
+      <div class="form-control w-full">
+        <label class="label" for="MSDS">
+          <span class="label-text font-semibold text-slate-700 flex items-center gap-2">
+            <i class="fa-solid fa-shield-halved field-icon text-warning"></i> Specification sheet (เอกสารข้อมูลทางเทคนิค)
+          </span>
+        </label>
+        <div class="flex gap-2">
+          <input type="text" id="MSDS" name="MSDS"
+            placeholder="ลิงก์ MSDS เช่น https://drive.google.com/... หรือพิมพ์ NA"
+            class="input input-bordered input-warning w-full focus:input-warning transition-all" />
+          <button type="button" onclick="document.getElementById('MSDS').value = 'NA';"
+            class="btn btn-warning btn-outline btn-sm whitespace-nowrap self-center tooltip"
+            data-tip="ใส่ NA หากไม่มีเอกสาร">
+            <i class="fa-solid fa-ban text-xs"></i> NA
+          </button>
+        </div>
+        <label class="label">
+          <span class="label-text-alt text-slate-400 flex items-center gap-1">
+            <i class="fa-solid fa-circle-info text-xs"></i>
+            วาง URL ของเอกสาร MSDS หรือกดปุ่ม NA หากไม่มีเอกสาร
+          </span>
+        </label>
+      </div>
+ 
+      <!-- Divider -->
+      <div class="divider before:bg-primary/20 after:bg-primary/20"></div>
+ 
+      <!-- Action Buttons -->
+      <div class="flex flex-col sm:flex-row items-center gap-3">
+        <button type="submit" id="submit-btn"
+          class="bg-gradient-to-r from-green-400 to-blue-500 btn btn-wide gap-2 shadow-lg shadow-primary/30 hover:shadow-primary/50 transition-all text-white text-xl">
+          <i class="fa-solid fa-floppy-disk text-white text-xl"></i>
+          บันทึกข้อมูล
+        </button>
+        <button type="button" id="cancel-btn" class="btn btn-ghost gap-2 hidden">
+          <i class="fa-solid fa-xmark"></i>
+          ยกเลิกการแก้ไข
+        </button>
+        <button type="reset"
+          class="bg-gradient-to-r from-red-400 to-yellow-500 btn btn-wide gap-2 shadow-lg shadow-primary/30 sm:ml-auto text-white text-xl">
+          <i class="fa-solid fa-rotate-left text-white text-xl"></i>
+          ล้างฟอร์ม
+        </button>
+      </div>
+    </form>
+  </div>
+ 
+  <!-- Footer -->
+  <div class="max-w-4xl mx-auto mt-6 text-center">
+    <p class="text-xs text-slate-400">
+      <i class="fa-solid fa-lock text-[10px]"></i>
+      ข้อมูลถูกจัดเก็บอย่างปลอดภัยผ่าน Google Sheets
+    </p>
+  </div>
+ 
+  <script src="script.js"></script>
+</body>
+ 
+</html>

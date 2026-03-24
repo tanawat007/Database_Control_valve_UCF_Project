@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Instrument Refinery-APP</title>
+    <!-- Tailwind CSS + DaisyUI -->
+  <link href="https://cdn.jsdelivr.net/npm/daisyui@4.12.14/dist/full.min.css" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { sans: ['Inter', 'Noto Sans Thai', 'sans-serif'] }
+        }
+      }
+    }
+  </script>
+ 
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+Thai:wght@400;500;600;700&display=swap%22
+    rel="stylesheet">
+ 
+  <!-- Font Awesome 6 -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+ 
+  <!-- SweetAlert2 -->
+  <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+ 
+  <style>
+    body {
+      font-family: 'Inter', 'Noto Sans Thai', sans-serif;
+      background: linear-gradient(135deg, #e0e7ff 0%, #f0fdfa 40%, #fdf4ff 100%);
+      min-height: 100vh;
+    }
+ 
+    .glass-card {
+      backdrop-filter: blur(16px);
+      background: rgba(255, 255, 255, 0.80);
+    }
+ 
+    .stat-card {
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+ 
+    .stat-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 28px rgba(0, 0, 0, 0.12);
+    }
+ 
+    .table-row-hover:hover {
+      background: rgba(99, 102, 241, 0.04);
+    }
+ 
+    .badge-expired {
+      animation: pulse-red 2s infinite;
+    }
+ 
+    @keyframes pulse-red {
+ 
+      0%,
+      100% {
+        box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4);
+      }
+ 
+      50% {
+        box-shadow: 0 0 0 6px rgba(239, 68, 68, 0);
+      }
+    }
+ 
+    /* custom scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+ 
+    ::-webkit-scrollbar-thumb {
+      background: #c7d2fe;
+      border-radius: 999px;
+    }
+  </style>
+</head>
+
+
+<body>
+<!-- ===== ช่วง Header ===== -->
+<!-- ===== NAVBAR ===== -->
+  <nav class="navbar glass-card sticky top-0 z-50 border-b border-white/40 shadow-sm px-4 lg:px-8">
+    <div class="flex-1 gap-3">
+      <div class="bg-gradient-to-br from-primary to-secondary p-2.5 rounded-xl shadow-md">
+        <i class="fa-solid fa-warehouse text-white text-xl"></i>
+      </div>
+      <div>
+        <h1 class="text-lg md:text-xl font-extrabold text-slate-800 leading-tight tracking-tight">Control valve</h1>
+        <p class="text-[11px] text-slate-400 -mt-0.5 hidden sm:block">Instrument Refinery</p>
+      </div>
+    </div>
+    <div class="flex-none gap-2">
+      <!-- Search -->
+      <div class="form-control hidden md:flex">
+        <div class="join">
+          <input id="search-input" type="text" placeholder="ค้นหา Control valve..."
+            class="input input-bordered input-sm w-56 focus:w-72 transition-all duration-300 join-item" />
+          <button class="btn btn-sm btn-primary join-item" onclick="handleSearch()">
+            <i class="fa-solid fa-magnifying-glass text-xs"></i>
+          </button>
+        </div>
+      </div>
+      <a href="createForm.html" class="btn btn-primary btn-sm gap-2 shadow-md shadow-primary/25">
+        <i class="fa-solid fa-plus"></i>
+        <span class="hidden sm:inline">เพิ่มข้อมูล Control valve</span>
+      </a>
+      <button onclick="fetchData()" class="btn btn-ghost btn-sm btn-circle tooltip tooltip-bottom" data-tip="รีเฟรช">
+        <i class="fa-solid fa-arrows-rotate text-slate-500"></i>
+      </button>
+    </div>
+  </nav>
+
+
+  <!-- ===== ช่วงข้อมูลที่เป็น 4 index ===== -->
+  <!-- ===== CONTENT ===== -->
+  <div class="container mx-auto px-4 lg:px-8 py-6 space-y-6">
+ 
+    <!-- ===== STATS CARDS ===== -->
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <!-- Total สารเคมีทั้งหมด -->
+      <div class="stat-card glass-card rounded-2xl border border-white/50 shadow-md p-4">
+        <div class="flex items-center gap-3">
+          <div class="bg-primary/10 p-3 rounded-xl">
+            <i class="fa-solid fa-boxes-stacked text-primary text-xl"></i>
+          </div>
+          <div>
+            <p class="text-xs text-slate-400 font-medium">Total control valve</p>
+            <p id="stat-total" class="text-2xl font-extrabold text-slate-800">0</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Areas พื้นที่จัดเก็บ -->
+      <div class="stat-card glass-card rounded-2xl border border-white/50 shadow-md p-4">
+        <div class="flex items-center gap-3">
+          <div class="bg-success/10 p-3 rounded-xl">
+            <i class="fa-solid fa-warehouse text-success text-xl"></i>
+          </div>
+          <div>
+            <p class="text-xs text-slate-400 font-medium">Plant area</p>
+            <p id="stat-areas" class="text-2xl font-extrabold text-emerald-600">0</p>
+          </div>
+        </div>
+      </div>
+    </div>
+ 
+    <!-- ===== MOBILE SEARCH ขนาดหน้าจอมือถือ ===== -->
+    <div class="md:hidden">
+      <div class="join w-full">
+        <input id="search-input-mobile" type="text" placeholder="ค้นหา Control valve..."
+          class="input input-bordered w-full join-item" />
+        <button class="btn btn-primary join-item" onclick="handleSearch()">
+          <i class="fa-solid fa-magnifying-glass"></i>
+        </button>
+      </div>
+    </div>
+ 
+  </div>
+
+    <!-- ===== ช่วงกลางของข้อมูล ===== -->
+  <!-- ===== TOOLBAR ===== -->
+    <div class="flex flex-wrap items-center justify-between gap-3">
+      <div class="flex items-center gap-2">
+        <h2 class="text-lg font-bold text-slate-700 flex items-center gap-2">
+          <i class="fa-solid fa-list text-primary"></i> รายการ Control valve
+        </h2>
+        <div class="badge badge-primary badge-outline gap-1" id="count-badge">
+          <i class="fa-solid fa-database text-[10px]"></i> <span id="badge-count">0</span> Item
+        </div>
+      </div>
+      <div class="flex items-center gap-2">
+        <!-- Filter by area -->
+        <select id="filter-area" class="select select-bordered select-sm" onchange="handleFilter()">
+          <option value="">ทุกพื้นที่</option>
+        </select>
+        <!-- Filter by status -->
+        <select id="filter-status" class="select select-bordered select-sm" onchange="handleFilter()">
+          <option value="">ทุกสถานะ</option>
+          <option value="active">ยังไม่หมดอายุ</option>
+          <option value="expiring">ใกล้หมดอายุ (≤30 วัน)</option>
+          <option value="expired">หมดอายุแล้ว</option>
+        </select>
+      </div>
+    </div>
+ 
+    <!-- ===== LOADING กำลังโหลดข้อมูล ===== -->
+    <div id="loading" class="flex flex-col items-center justify-center py-20">
+      <div class="relative">
+        <div class="w-16 h-16 border-4 border-primary/20 rounded-full animate-spin border-t-primary"></div>
+        <i
+          class="fa-solid fa-flask absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-primary text-lg"></i>
+      </div>
+      <p class="mt-4 text-slate-500 font-medium animate-pulse">กำลังโหลดข้อมูล Control valve...</p>
+    </div>
+ 
+    <!-- ===== DATA TABLE ===== -->
+    <div class="glass-card rounded-2xl border border-white/50 shadow-lg overflow-hidden">
+      <div class="overflow-x-auto">
+        <table id="data-table" class="table table-zebra w-full">
+          <thead>
+            <tr class="bg-gradient-to-r from-slate-50 to-slate-100">
+              <th class="text-xs text-slate-500 font-semibold uppercase">
+                <i class="fa-solid fa-barcode mr-1 text-primary/60"></i> Tag Number
+              </th>
+              <th class="text-xs text-slate-500 font-semibold uppercase">
+                <i class="fa-solid fa-image mr-1 text-primary/60"></i> รูปภาพ
+              </th>
+              <th class="text-xs text-slate-500 font-semibold uppercase">
+                <i class="fa-solid fa-warehouse mr-1 text-primary/60"></i> Plant area
+              </th>
+              <th class="text-xs text-slate-500 font-semibold uppercase">
+                <i class="fa-solid fa-warehouse mr-1 text-primary/60"></i> Service Location
+              </th>
+              <th class="text-xs text-slate-500 font-semibold uppercase">
+                <i class="fa-solid fa-file-lines mr-1 text-primary/60"></i> Valve Type
+              </th>
+              <th class="text-xs text-slate-500 font-semibold uppercase">
+                <i class="fa-solid fa-file-lines mr-1 text-primary/60"></i> Valve Size
+              </th>
+              <th class="text-xs text-slate-500 font-semibold uppercase">
+                <i class="fa-solid fa-file-lines mr-1 text-primary/60"></i> Leakage Class
+              </th>
+              <th class="text-xs text-slate-500 font-semibold uppercase">
+                <i class="fa-solid fa-file-lines mr-1 text-primary/60"></i> Fail Action
+              </th>
+              <th class="text-xs text-slate-500 font-semibold uppercase">
+                <i class="fa-solid fa-calendar-xmark mr-1 text-error/60"></i> Due date
+              </th>
+              <th class="text-xs text-slate-500 font-semibold uppercase">
+                <i class="fa-solid fa-shield-halved mr-1 text-warning/60"></i> Specification sheet
+              </th>
+              <th class="text-xs text-slate-500 font-semibold uppercase text-center">
+                <i class="fa-solid fa-gear mr-1 text-slate-400"></i> จัดการ
+              </th>
+            </tr>
+          </thead>
+          <tbody id="table-body">
+          </tbody>
+        </table>
+      </div>
+ 
+      <!-- Empty State -->
+      <div id="empty-state" class="hidden flex-col items-center justify-center py-20 text-center">
+        <div class="bg-slate-100 p-6 rounded-full mb-4">
+          <i class="fa-solid fa-flask-vial text-4xl text-slate-300"></i>
+        </div>
+        <h3 class="text-lg font-bold text-slate-500">ยังไม่มีข้อมูล Control valve</h3>
+        <p class="text-sm text-slate-400 mt-1">เริ่มต้นเพิ่ม Control valve ตัวแรกของคุณ</p>
+        <a href="createForm.html" class="btn btn-primary btn-sm mt-4 gap-2">
+          <i class="fa-solid fa-plus"></i> เพิ่ม Control valve
+        </a>
+      </div>
+    </div>
+ 
+    <!-- ===== PAGINATION ===== -->
+    <div id="pagination" class="glass-card rounded-2xl border border-white/50 shadow-md px-5 py-3 hidden">
+      <!-- Mobile -->
+      <div class="flex justify-between items-center sm:hidden">
+        <button id="prev-mobile" class="btn btn-outline btn-sm gap-1">
+          <i class="fa-solid fa-chevron-left text-xs"></i> ก่อนหน้า
+        </button>
+        <span class="text-sm font-semibold text-slate-600" id="page-indicator-mobile">1 / 1</span>
+        <button id="next-mobile" class="btn btn-outline btn-sm gap-1">
+          ถัดไป <i class="fa-solid fa-chevron-right text-xs"></i>
+        </button>
+      </div>
+      <!-- Desktop -->
+      <div class="hidden sm:flex sm:items-center sm:justify-between">
+        <p class="text-sm text-slate-500">
+          แสดง <span class="font-bold text-slate-700" id="showing-start">1</span>
+          ถึง <span class="font-bold text-slate-700" id="showing-end">10</span>
+          จาก <span class="font-bold text-primary" id="total-items">0</span> รายการ
+        </p>
+        <div class="join">
+          <button id="prev-btn" class="join-item btn btn-sm">
+            <i class="fa-solid fa-chevron-left text-xs"></i>
+          </button>
+          <div id="page-numbers" class="flex"></div>
+          <button id="next-btn" class="join-item btn btn-sm">
+            <i class="fa-solid fa-chevron-right text-xs"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+ 
+<!-- ===== FOOTER ===== -->
+  <footer class="text-center py-6 text-xs text-slate-400 space-y-1">
+    <p><i class="fas fa-warehouse text-[10px]"></i>
+      สำหรับบริหารจัดการ PREM Digital Transform - Data Management</p>
+    <p>&copy; 2026 Instrument Refinery Data Management System | Training by
+      <a href="#" class="font-semibold hover:underline">Pathompong CH.</a>
+    </p>
+  </footer>
+ 
+  <!-- ===== VIEW DETAIL MODAL ===== -->
+  <dialog id="detail-modal" class="modal modal-bottom sm:modal-middle">
+    <div class="modal-box max-w-2xl p-0 overflow-hidden bg-gradient-to-br from-white to-slate-50">
+      <!-- Modal Header -->
+      <div class="bg-gradient-to-r from-primary to-secondary px-6 py-4 flex items-center justify-between">
+        <h3 class="text-lg font-bold text-white flex items-center gap-2">
+          <i class="fa-solid fa-flask-vial"></i> รายละเอียด Control valve
+        </h3>
+        <form method="dialog">
+          <button class="btn btn-sm btn-circle btn-ghost text-white hover:bg-white/20">
+            <i class="fa-solid fa-xmark text-lg"></i>
+          </button>
+        </form>
+      </div>
+ 
+      <!-- Modal Body -->
+      <div class="p-6 space-y-5">
+        <!-- Image + Code Section -->
+        <div class="flex flex-col sm:flex-row gap-5">
+          <div class="flex-shrink-0">
+            <div
+              class="w-32 h-32 rounded-2xl overflow-hidden ring-2 ring-slate-200 bg-slate-50 flex items-center justify-center">
+              <img id="detail-image" src="images/noimage.svg" alt="Chemical" class="w-full h-full object-cover"
+                onerror="this.src='images/noimage.svg'" />
+            </div>
+          </div>
+          <div class="flex-1 space-y-2">
+            <div class="flex items-center gap-2">
+              <span class="badge badge-primary badge-lg font-mono font-bold" id="detail-code">-</span>
+              <span id="detail-expiry-badge"></span>
+            </div>
+            <h2 class="text-xl font-bold text-slate-800" id="detail-description">-</h2>
+            <div class="text-xs text-slate-400 flex items-center gap-1">
+              <i class="fa-solid fa-clock"></i>
+              <span id="detail-timestamp">-</span>
+            </div>
+          </div>
+        </div>
+ 
+        <!-- Info Grid -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <!-- Keeping Area -->
+          <div class="flex items-start gap-3 bg-white rounded-xl p-4 border border-slate-100 shadow-sm">
+            <div class="bg-info/10 text-info p-2.5 rounded-lg">
+              <i class="fa-solid fa-warehouse text-lg"></i>
+            </div>
+            <div>
+              <p class="text-xs text-slate-400 font-medium">Plant area</p>
+              <p class="text-sm font-semibold text-slate-700" id="detail-area">-</p>
+            </div>
+          </div>
+ 
+          <!-- Quantity -->
+          <div class="flex items-start gap-3 bg-white rounded-xl p-4 border border-slate-100 shadow-sm">
+            <div class="bg-success/10 text-success p-2.5 rounded-lg">
+              <i class="fa-solid fa-cubes-stacked text-lg"></i>
+            </div>
+            <div>
+              <p class="text-xs text-slate-400 font-medium">Valve Type</p>
+              <p class="text-sm font-semibold text-slate-700" id="detail-quantity">-</p>
+            </div>
+          </div>
+ 
+          <!-- Lifttime -->
+          <div class="flex items-start gap-3 bg-white rounded-xl p-4 border border-slate-100 shadow-sm">
+            <div class="bg-warning/10 text-warning p-2.5 rounded-lg">
+              <i class="fa-solid fa-hourglass-half text-lg"></i>
+            </div>
+            <div>
+              <p class="text-xs text-slate-400 font-medium">Valve size & Rating</p>
+              <p class="text-sm font-semibold text-slate-700" id="detail-lifttime">-</p>
+            </div>
+          </div>
+ 
+          <!-- Leakage Class -->
+          <div class="flex items-start gap-3 bg-white rounded-xl p-4 border border-slate-100 shadow-sm">
+            <div class="bg-success/10 text-success p-2.5 rounded-lg">
+              <i class="fa-solid fa-file-lines text-lg"></i>
+            </div>
+            <div>
+              <p class="text-xs text-slate-400 font-medium">Leakage Class</p>
+              <p class="text-sm font-semibold text-slate-700" id="detail-leakage">-</p>
+            </div>
+          </div>
+ 
+          <!-- Fail Action -->
+          <div class="flex items-start gap-3 bg-white rounded-xl p-4 border border-slate-100 shadow-sm">
+            <div class="bg-success/10 text-success p-2.5 rounded-lg">
+              <i class="fa-solid fa-file-lines text-lg"></i>
+            </div>
+            <div>
+              <p class="text-xs text-slate-400 font-medium">Fail Action</p>
+              <p class="text-sm font-semibold text-slate-700" id="detail-failaction">-</p>
+            </div>
+          </div>
+ 
+          <!-- Date of Use -->
+          <div class="flex items-start gap-3 bg-white rounded-xl p-4 border border-slate-100 shadow-sm">
+            <div class="bg-primary/10 text-primary p-2.5 rounded-lg">
+              <i class="fa-solid fa-calendar-check text-lg"></i>
+            </div>
+            <div>
+              <p class="text-xs text-slate-400 font-medium">Last action date</p>
+              <p class="text-sm font-semibold text-slate-700" id="detail-dateOfUse">-</p>
+            </div>
+          </div>
+ 
+          <!-- Expired Date -->
+          <div class="flex items-start gap-3 bg-white rounded-xl p-4 border border-slate-100 shadow-sm">
+            <div class="bg-error/10 text-error p-2.5 rounded-lg">
+              <i class="fa-solid fa-calendar-xmark text-lg"></i>
+            </div>
+            <div>
+              <p class="text-xs text-slate-400 font-medium">Next due date</p>
+              <p class="text-sm font-semibold text-slate-700" id="detail-expiredDate">-</p>
+            </div>
+          </div>
+ 
+          <!-- MSDS -->
+          <div class="flex items-start gap-3 bg-white rounded-xl p-4 border border-slate-100 shadow-sm">
+            <div class="bg-warning/10 text-warning p-2.5 rounded-lg">
+              <i class="fa-solid fa-file-shield text-lg"></i>
+            </div>
+            <div>
+              <p class="text-xs text-slate-400 font-medium">เอกสาร Specification Sheet</p>
+              <p class="text-sm font-semibold text-slate-700" id="detail-msds">-</p>
+            </div>
+          </div>
+        </div>
+      </div>
+ 
+      <!-- Modal Footer -->
+      <div class="px-6 py-4 bg-slate-50 border-t border-slate-100 flex justify-end">
+        <form method="dialog">
+          <button class="btn btn-sm btn-ghost gap-1.5">
+            <i class="fa-solid fa-xmark"></i> ปิด
+          </button>
+        </form>
+      </div>
+    </div>
+    <form method="dialog" class="modal-backdrop"><button>close</button></form>
+  </dialog>
+ 
+  <!-- ===== IMAGE MODAL ===== -->
+  <dialog id="image-modal" class="modal">
+    <div class="modal-box max-w-3xl p-4">
+      <div class="flex justify-between items-center mb-3">
+        <h3 id="modal-title" class="font-bold text-lg flex items-center gap-2">
+          <i class="fa-solid fa-image text-primary"></i> รูปภาพสารเคมี
+        </h3>
+        <form method="dialog">
+          <button class="btn btn-sm btn-circle btn-ghost"><i class="fa-solid fa-xmark"></i></button>
+        </form>
+      </div>
+      <img id="modal-image" src="" alt="Chemical Image"
+        class="w-full max-h-[75vh] object-contain rounded-xl bg-slate-50" />
+    </div>
+    <form method="dialog" class="modal-backdrop"><button>close</button></form>
+  </dialog>
+ 
+ 
+ <script src="script.js"></script>
+</body>
+</html>
